@@ -25,7 +25,6 @@ with st.sidebar:
 6. **Synthesizer** writes the final report
     """)
     st.divider()
-    st.info("No API keys needed for search — uses DuckDuckGo (free).\nNeeds `GROQ_API_KEY` for the LLM.")
 
     st.header("📚 Example Topics")
     examples = [

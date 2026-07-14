@@ -1,6 +1,9 @@
 import logging
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from .agents.orchestrator import ResearchOrchestrator
 from .utils.config import HOST, PORT
@@ -12,6 +15,9 @@ app = FastAPI(
 )
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 orchestrator = ResearchOrchestrator()
+
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
+
 class ResearchRequest(BaseModel):
     topic: str = Field(..., description="Research topic or question")
     class Config:
@@ -31,6 +37,16 @@ async def research(request: ResearchRequest):
         "critic_score": result.get("critic_report", {}).get("quality_score"),
         "status": result.get("status", "complete")
     }
+
+# Serve frontend at root
+@app.get("/")
+async def serve_frontend():
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
+
+# Serve any other static assets from frontend/
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host=HOST, port=PORT, reload=True)
+

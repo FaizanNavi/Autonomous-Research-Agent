@@ -4,7 +4,7 @@ import logging
 from typing import List, Dict, Any, TypedDict, Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from ..utils.config import GROQ_API_KEY, LLM_MODEL, GROQ_BASE_URL, MAX_SUB_QUESTIONS
+from ..utils.config import GROQ_API_KEY, LLM_MODEL, GROQ_BASE_URL, MAX_SUB_QUESTIONS, MAX_REFLECTION_CYCLES
 logger = logging.getLogger(__name__)
 class ResearchState(TypedDict):
     topic: str

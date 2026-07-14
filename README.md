@@ -1,4 +1,3 @@
-mit
 # 🔬 Autonomous Research Agent
 
 A 5-agent AI system that researches any topic autonomously using a **LangGraph reflection loop**. The Critic agent reviews the research quality and can send it back for another round — up to 3 cycles — so the output keeps improving.
@@ -68,6 +67,9 @@ P3-Autonomous-Research/
 │       └── config.py              ← Centralized config
 ├── tests/
 │   └── test_agents.py             ← Unit tests
+├── data/                          ← Local sqlite DB storage
+├── frontend/                      ← Production HTML/JS frontend (for dev/presentation)
+├── streamlit_app.py               ← Quick Streamlit UI for internal testing
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
@@ -77,30 +79,75 @@ P3-Autonomous-Research/
 
 ## 🚀 Quick Start
 
-### 1. Install dependencies
+### 1. Install uv (if not already installed)
 ```bash
-cd P3-Autonomous-Research
-pip install -r requirements.txt
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ### 2. Set up environment
 ```bash
+cd P3-Autonomous-Research
 cp .env.example .env
 # Edit .env and add your GROQ_API_KEY (free at console.groq.com)
 ```
 
-### 3. Start the server
+### 3. Install dependencies
 ```bash
-uvicorn app.main:app --reload --port 8003
+uv sync
+```
+This creates a `.venv/` and installs all packages from `pyproject.toml` automatically.
+
+### 4. Run everything with a single command 🎉
+```bash
+uv run python run.py
 ```
 
-### 4. Try it
-Open http://localhost:8003/docs for interactive API docs, or:
+This starts **both** the FastAPI backend (port 8003) and the HTML frontend (port 3000) together. Press `Ctrl+C` once to shut everything down.
 
+| Service | URL |
+|---------|-----|
+| Backend API | `http://localhost:8003` |
+| API Docs | `http://localhost:8003/docs` |
+| Frontend | `http://localhost:3000` |
+
+---
+
+## 🖥️ Run Options
+
+### Default — Backend + HTML Frontend
 ```bash
-curl -X POST http://localhost:8003/research \
-  -H "Content-Type: application/json" \
-  -d '{"topic": "Impact of AI on job markets in 2025"}'
+uv run python run.py
+```
+
+### Backend Only
+```bash
+uv run python run.py --no-frontend
+```
+
+### Backend + Streamlit UI
+```bash
+uv run python run.py --streamlit
+```
+Opens Streamlit at `http://localhost:8501` with:
+- 📝 **Topic chat input** — enter any research topic
+- 🔄 **Reflection loop explanation sidebar** — understand how agents iterate
+- 📚 **Example topics** — one-click topic presets for quick testing
+- 📊 **Agent metadata expander** — view reflection cycles, critic score, and final status
+
+### Manual (individual services)
+```bash
+# Terminal 1 — Backend
+uv run uvicorn app.main:app --port 8003 --reload
+
+# Terminal 2 — Frontend
+cd frontend && python -m http.server 3000
+
+# Terminal 3 — Streamlit (optional)
+uv run streamlit run streamlit_app.py
 ```
 
 ## 📐 API Endpoints
@@ -126,8 +173,4 @@ curl -X POST http://localhost:8003/research \
 pytest tests/ -v
 ```
 
-## 📝 Resume Bullet
-> "Built Autonomous Research Agent with LangGraph supervisor pattern — 5 agents (Planner, Search×N, Summarizer, Critic, Synthesizer) with a 3-cycle reflection loop. Critic verifies citations by cross-checking source evidence, routes missing topics back to Planner for targeted re-search. SQLite memory tracks research history across sessions."
 
-## 📄 License
-MIT
